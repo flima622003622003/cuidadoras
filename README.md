@@ -147,6 +147,25 @@ de tela de "criar conta" no site para este MVP — você mesmo cria os
 acessos manualmente, o que também evita gente de fora se cadastrando
 sozinha num app que guarda dados de saúde de terceiros.
 
+## Perfil de administrador
+
+Existe uma tabela `profiles` (id do usuário + `role`) que controla quem
+pode acessar `admin.html`, uma tela que lista **todos** os registros
+diários (de qualquer cuidador) e permite apagá-los — algo que nenhuma
+cuidadora comum pode fazer.
+
+Para tornar alguém administrador, rode no **SQL Editor** do Supabase
+(troque pelo UUID do usuário, visível em Authentication → Users):
+
+```sql
+insert into profiles (id, role) values ('UUID-DO-USUARIO', 'admin')
+on conflict (id) do update set role = 'admin';
+```
+
+O link "Administração" só aparece na tela inicial para quem é admin,
+mas a segurança de verdade vem da política de RLS (`is_admin()`), não
+da interface.
+
 ## Passo 5 — Publicar no GitHub Pages
 
 1. Crie um repositório no GitHub e suba esta pasta inteira (`git add .`, `git commit`, `git push`).

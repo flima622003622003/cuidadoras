@@ -7,8 +7,8 @@
 // normalmente. A proteção real dos dados vem das políticas de RLS
 // configuradas no banco (veja o README.md).
 
-const SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
-const SUPABASE_ANON_KEY = "SUA_CHAVE_ANON_PUBLICA_AQUI";
+const SUPABASE_URL = "https://owjfyhrpirmqvkbaxokx.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_ltaNA7nnVozoSCOcZIjg";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

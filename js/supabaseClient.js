@@ -8,7 +8,7 @@
 // configuradas no banco (veja o README.md).
 
 const SUPABASE_URL = "https://owjfyhrpirmqvkbaxokx.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_ltaNA7nnVozoSCOcZIjg";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93amZ5aHJwaXJtcXZrYmF4b2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMTU2MDQsImV4cCI6MjEwNTU5MTYwNH0.tj71uf_CT4qAP6igEm1flI-m0DA1zBIP226LsECt_70";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

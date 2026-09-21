@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuidar Perto — Avaliação Inicial</title>
+<link rel="stylesheet" href="css/estilo.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+</head>
+<body>
+<div class="pagina">
+
+  <div class="cabecalho">
+    <h1>Avaliação inicial</h1>
+    <button class="link-sair" onclick="fazerLogout()">Sair</button>
+  </div>
+
+  <div class="progresso">
+    <div class="etapa ativa" data-passo="1"></div>
+    <div class="etapa" data-passo="2"></div>
+    <div class="etapa" data-passo="3"></div>
+  </div>
+
+  <!-- PASSO 1: Identificação -->
+  <section id="passo-1">
+    <h2 class="secao-titulo">Identificação</h2>
+    <div class="campo">
+      <label for="nome">Nome do idoso</label>
+      <input type="text" id="nome">
+    </div>
+    <div class="campo">
+      <label for="data_nascimento">Data de nascimento</label>
+      <input type="date" id="data_nascimento">
+    </div>
+    <button class="botao-primario" onclick="irParaPasso(2)">Continuar</button>
+  </section>
+
+  <!-- PASSO 2: AVD's e AIVD's -->
+  <section id="passo-2" style="display:none;">
+    <h2 class="secao-titulo">Atividades de Vida Diária (AVD's)</h2>
+    <p class="ajuda" style="margin-bottom: 16px;">Para cada atividade, marque o nível de ajuda que a pessoa precisa hoje.</p>
+
+    <div id="campos-avd"></div>
+
+    <h2 class="secao-titulo">Atividades Instrumentais (AIVD's)</h2>
+    <div id="campos-aivd"></div>
+
+    <div class="linha-botoes">
+      <button class="botao-secundario" onclick="irParaPasso(1)">Voltar</button>
+      <button class="botao-primario" onclick="irParaPasso(3)">Continuar</button>
+    </div>
+  </section>
+
+  <!-- PASSO 3: Dados clínicos -->
+  <section id="passo-3" style="display:none;">
+    <h2 class="secao-titulo">Dados clínicos</h2>
+
+    <div class="campo">
+      <label for="historico_clinico">Histórico clínico (doenças anteriores, quedas, cirurgias)</label>
+      <textarea id="historico_clinico"></textarea>
+    </div>
+
+    <div class="campo">
+      <label>Já teve queda nos últimos meses?</label>
+      <div class="grupo-opcoes">
+        <label class="opcao"><input type="radio" name="historico_queda" value="sim"><span>Sim</span></label>
+        <label class="opcao"><input type="radio" name="historico_queda" value="nao"><span>Não</span></label>
+      </div>
+    </div>
+
+    <div id="campos-clinicos"></div>
+
+    <div class="campo">
+      <label>Tem alergia?</label>
+      <div class="grupo-opcoes">
+        <label class="opcao"><input type="radio" name="tem_alergia" value="sim" onclick="document.getElementById('qual_alergia').style.display='block'"><span>Sim</span></label>
+        <label class="opcao"><input type="radio" name="tem_alergia" value="nao" onclick="document.getElementById('qual_alergia').style.display='none'"><span>Não</span></label>
+      </div>
+      <input type="text" id="qual_alergia" placeholder="Qual alergia?" style="display:none; margin-top:8px;">
+    </div>
+
+    <div class="campo">
+      <label for="outras_comorbidades">Outras comorbidades</label>
+      <textarea id="outras_comorbidades"></textarea>
+    </div>
+
+    <p id="erro-cadastro" class="mensagem-erro" style="display:none;"></p>
+
+    <div class="linha-botoes">
+      <button class="botao-secundario" onclick="irParaPasso(2)">Voltar</button>
+      <button class="botao-primario" onclick="salvarAvaliacao()">Concluir cadastro</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const OPCOES_NIVEL = ["Sem auxílio", "Auxílio parcial", "Auxílio total"];
+  const VALOR_NIVEL = { "Sem auxílio": "sem_auxilio", "Auxílio parcial": "auxilio_parcial", "Auxílio total": "auxilio_total" };
+
+  const AVDS = [
+    ["avd_alimentar_se", "Alimentar-se"],
+    ["avd_ir_banheiro", "Ir ao banheiro"],
+    ["avd_higiene_pessoal", "Higiene pessoal"],
+    ["avd_controle_urina", "Controle de urina"]
+  ];
+
+  const AIVDS = [
+    ["aivd_gerenciar_financas", "Gerenciar finanças"],
+    ["aivd_lidar_transporte", "Lidar com transporte"],
+    ["aivd_fazer_compras", "Fazer compras"],
+    ["aivd_preparar_refeicoes", "Preparar refeições"],
+    ["aivd_usar_telefone", "Usar telefone ou outros meios de comunicação"],
+    ["aivd_gerenciar_medicacoes", "Gerenciar as próprias medicações"],
+    ["aivd_manutencao_casa", "Manutenção das tarefas domésticas e da casa"]
+  ];
+
+  const CAMPOS_CLINICOS_SIM_NAO = [
+    ["pressao_alta", "Tem pressão alta?"],
+    ["problema_coracao", "Tem problema de coração?"],
+    ["problema_circulacao", "Tem problema de circulação?"],
+    ["diabetes", "Tem diabetes?"],
+    ["colesterol_alto", "Tem colesterol alto?"],
+    ["problema_renal", "Tem problema renal?"],
+    ["dorme_bem", "Dorme bem?"],
+    ["ouve_bem", "Ouve bem?"]
+  ];
+
+  function gerarGrupoNivel(chave, label) {
+    return `
+      <div class="campo">
+        <label>${label}</label>
+        <div class="grupo-opcoes">
+          ${OPCOES_NIVEL.map(op => `
+            <label class="opcao">
+              <input type="radio" name="${chave}" value="${VALOR_NIVEL[op]}">
+              <span>${op}</span>
+            </label>`).join("")}
+        </div>
+      </div>`;
+  }
+
+  function gerarGrupoSimNao(chave, label) {
+    return `
+      <div class="campo">
+        <label>${label}</label>
+        <div class="grupo-opcoes">
+          <label class="opcao"><input type="radio" name="${chave}" value="sim"><span>Sim</span></label>
+          <label class="opcao"><input type="radio" name="${chave}" value="nao"><span>Não</span></label>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById("campos-avd").innerHTML = AVDS.map(([c, l]) => gerarGrupoNivel(c, l)).join("");
+  document.getElementById("campos-aivd").innerHTML = AIVDS.map(([c, l]) => gerarGrupoNivel(c, l)).join("");
+  document.getElementById("campos-clinicos").innerHTML = CAMPOS_CLINICOS_SIM_NAO.map(([c, l]) => gerarGrupoSimNao(c, l)).join("");
+
+  function irParaPasso(passo) {
+    [1, 2, 3].forEach(p => {
+      document.getElementById(`passo-${p}`).style.display = p === passo ? "block" : "none";
+      const bolinha = document.querySelector(`.etapa[data-passo="${p}"]`);
+      bolinha.classList.toggle("ativa", p === passo);
+      bolinha.classList.toggle("concluida", p < passo);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function valorRadio(nome) {
+    return document.querySelector(`input[name="${nome}"]:checked`)?.value || null;
+  }
+
+  async function salvarAvaliacao() {
+    const erro = document.getElementById("erro-cadastro");
+    erro.style.display = "none";
+
+    const nome = document.getElementById("nome").value.trim();
+    if (!nome) {
+      irParaPasso(1);
+      erro.textContent = "Informe o nome do idoso.";
+      erro.style.display = "block";
+      return;
+    }
+
+    // 1. Cria o registro do idoso
+    const { data: idoso, error: erroIdoso } = await supabase
+      .from("idosos")
+      .insert({
+        nome,
+        data_nascimento: document.getElementById("data_nascimento").value || null
+      })
+      .select()
+      .single();
+
+    if (erroIdoso) {
+      erro.textContent = "Erro ao salvar idoso: " + erroIdoso.message;
+      erro.style.display = "block";
+      return;
+    }
+
+    // 2. Vincula o idoso ao cuidador logado
+    const { data: { session } } = await supabase.auth.getSession();
+    await supabase.from("cuidadores_idosos").insert({
+      cuidador_id: session.user.id,
+      idoso_id: idoso.id
+    });
+
+    // 3. Monta e salva a avaliação inicial
+    const avaliacao = { idoso_id: idoso.id };
+    AVDS.forEach(([c]) => avaliacao[c] = valorRadio(c));
+    AIVDS.forEach(([c]) => avaliacao[c] = valorRadio(c));
+    CAMPOS_CLINICOS_SIM_NAO.forEach(([c]) => avaliacao[c] = valorRadio(c));
+    avaliacao.historico_clinico = document.getElementById("historico_clinico").value;
+    avaliacao.historico_queda = valorRadio("historico_queda");
+    avaliacao.tem_alergia = valorRadio("tem_alergia");
+    avaliacao.qual_alergia = document.getElementById("qual_alergia").value || null;
+    avaliacao.outras_comorbidades = document.getElementById("outras_comorbidades").value;
+
+    const { error: erroAvaliacao } = await supabase.from("avaliacoes_iniciais").insert(avaliacao);
+
+    if (erroAvaliacao) {
+      erro.textContent = "Erro ao salvar avaliação: " + erroAvaliacao.message;
+      erro.style.display = "block";
+      return;
+    }
+
+    window.location.href = `registro-diario.html?idoso=${idoso.id}`;
+  }
+
+  (async () => { await checarSessao(); })();
+</script>
+
+</body>
+</html>

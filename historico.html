@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuidar Perto — Histórico</title>
+<link rel="stylesheet" href="css/estilo.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+</head>
+<body>
+<div class="pagina">
+
+  <div class="cabecalho">
+    <h1>Histórico</h1>
+    <button class="link-sair" onclick="fazerLogout()">Sair</button>
+  </div>
+
+  <div id="lista-registros">Carregando...</div>
+
+  <a href="javascript:history.back()" style="display:block; text-align:center; margin-top:20px; font-size:0.9rem;">← Voltar</a>
+
+</div>
+
+<script>
+  const idosoId = new URLSearchParams(window.location.search).get("idoso");
+
+  async function carregarHistorico() {
+    const { data, error } = await supabase
+      .from("registros_diarios")
+      .select("data, campos_extras, criado_em")
+      .eq("idoso_id", idosoId)
+      .order("data", { ascending: false })
+      .limit(30);
+
+    const container = document.getElementById("lista-registros");
+
+    if (error || !data || data.length === 0) {
+      container.innerHTML = "<p>Nenhum registro ainda.</p>";
+      return;
+    }
+
+    container.innerHTML = data.map(r => `
+      <div class="registro-item">
+        <div class="data">${new Date(r.data + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}</div>
+        <div class="ajuda">${resumirRegistro(r.campos_extras)}</div>
+      </div>
+    `).join("");
+  }
+
+  // Um resumo simples e legível do que foi preenchido naquele dia,
+  // sem tentar mostrar todos os campos técnicos.
+  function resumirRegistro(campos) {
+    const partes = [];
+    if (campos.observacoes) partes.push(campos.observacoes);
+    if (campos.glicemia?.valor) partes.push(`Glicemia: ${campos.glicemia.valor} mg/dL`);
+    if (campos.pressao_arterial?.sistolica) partes.push(`PA: ${campos.pressao_arterial.sistolica}/${campos.pressao_arterial.diastolica}`);
+    return partes.length ? partes.join(" · ") : "Registro sem observações adicionais.";
+  }
+
+  (async () => {
+    await checarSessao();
+    carregarHistorico();
+  })();
+</script>
+
+</body>
+</html>

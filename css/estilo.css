@@ -1,0 +1,277 @@
+/* estilo.css
+   Sistema visual do MVP.
+
+   Contexto de uso real: uma cuidadora, muitas vezes no meio de uma tarefa,
+   pegando o celular por 2-3 minutos para preencher um registro. Por isso
+   as escolhas aqui priorizam: alvos de toque grandes, alto contraste,
+   pouquíssima decoração, e uma hierarquia visual clara entre "o que é
+   sempre preenchido" e "o que apareceu por causa do perfil do idoso".
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600&family=Public+Sans:wght@400;500;600&display=swap');
+
+:root {
+  /* Paleta: verde-sálvia acalmado como base, evitando o clichê
+     "bege quente + terracota" comum em interfaces geradas por IA.
+     O tom de atenção usa âmbar, não vermelho, porque os alertas aqui
+     (sono ruim, glicemia) pedem cuidado, não emergência. */
+  --cor-fundo: #F1F4F1;
+  --cor-superficie: #FFFFFF;
+  --cor-texto: #1E2A22;
+  --cor-texto-suave: #55645A;
+  --cor-primaria: #2F6F62;
+  --cor-primaria-escura: #24564B;
+  --cor-atencao: #B8792A;
+  --cor-atencao-fundo: #FBF1E1;
+  --cor-borda: #D8DED9;
+
+  --fonte-titulo: 'Source Serif 4', Georgia, serif;
+  --fonte-corpo: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --raio: 10px;
+  --espaco-1: 8px;
+  --espaco-2: 16px;
+  --espaco-3: 24px;
+  --espaco-4: 40px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--fonte-corpo);
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pagina {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--espaco-3) var(--espaco-2) var(--espaco-4);
+  min-height: 100vh;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--espaco-3);
+}
+
+.cabecalho h1 {
+  font-family: var(--fonte-titulo);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cabecalho .subtitulo {
+  color: var(--cor-texto-suave);
+  font-size: 0.9rem;
+}
+
+.link-sair {
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+h2.secao-titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: var(--espaco-3) 0 var(--espaco-1);
+  padding-bottom: var(--espaco-1);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.campo {
+  margin-bottom: var(--espaco-2);
+}
+
+.campo label {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.campo .ajuda {
+  font-size: 0.8rem;
+  color: var(--cor-texto-suave);
+  margin-top: 4px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-family: var(--fonte-corpo);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+textarea { resize: vertical; min-height: 70px; }
+
+input:focus, select:focus, textarea:focus, button:focus, .opcao input:focus + span {
+  outline: 3px solid #9CC5BB;
+  outline-offset: 1px;
+}
+
+.grupo-opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.opcao {
+  position: relative;
+}
+
+.opcao input { position: absolute; opacity: 0; }
+
+.opcao span {
+  display: inline-block;
+  padding: 10px 14px;
+  min-height: 44px;
+  line-height: 24px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: var(--cor-superficie);
+}
+
+.opcao input:checked + span {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: #fff;
+}
+
+.campo-destacado {
+  border-left: 3px solid var(--cor-atencao);
+  background: var(--cor-atencao-fundo);
+  padding: var(--espaco-2);
+  border-radius: var(--raio);
+  margin-bottom: var(--espaco-2);
+}
+
+.botao-primario {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--fonte-corpo);
+  color: #fff;
+  background: var(--cor-primaria);
+  border: none;
+  border-radius: var(--raio);
+  cursor: pointer;
+  margin-top: var(--espaco-3);
+}
+
+.botao-primario:hover { background: var(--cor-primaria-escura); }
+
+.botao-secundario {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--cor-primaria-escura);
+  background: transparent;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  cursor: pointer;
+  margin-top: var(--espaco-1);
+}
+
+.linha-botoes {
+  display: flex;
+  gap: var(--espaco-1);
+}
+
+.lista-idosos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista-idosos li {
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: var(--espaco-2);
+  margin-bottom: var(--espaco-1);
+  background: var(--cor-superficie);
+}
+
+.lista-idosos a {
+  display: block;
+  text-decoration: none;
+  color: var(--cor-texto);
+  font-weight: 500;
+}
+
+.progresso {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--espaco-3);
+}
+
+.progresso .etapa {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--cor-borda);
+}
+
+.progresso .etapa.ativa,
+.progresso .etapa.concluida {
+  background: var(--cor-primaria);
+}
+
+.mensagem-erro {
+  color: #A23B2E;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+.mensagem-sucesso {
+  background: #E4F1EA;
+  color: var(--cor-primaria-escura);
+  padding: var(--espaco-2);
+  border-radius: var(--raio);
+  margin-bottom: var(--espaco-2);
+  font-size: 0.9rem;
+}
+
+.registro-item {
+  border-bottom: 1px solid var(--cor-borda);
+  padding: var(--espaco-2) 0;
+}
+
+.registro-item .data {
+  font-weight: 600;
+  font-family: var(--fonte-titulo);
+}
+
+.registro-item .cuidador {
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+}

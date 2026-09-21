@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuidar Perto — Registro do dia</title>
+<link rel="stylesheet" href="css/estilo.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/regras.js"></script>
+<script src="js/formulario-dinamico.js"></script>
+</head>
+<body>
+<div class="pagina">
+
+  <div class="cabecalho">
+    <div>
+      <h1 id="nome-idoso">Registro do dia</h1>
+      <div class="subtitulo" id="data-hoje"></div>
+    </div>
+    <button class="link-sair" onclick="fazerLogout()">Sair</button>
+  </div>
+
+  <p id="carregando">Carregando formulário...</p>
+
+  <form id="formulario-registro" style="display:none;" onsubmit="event.preventDefault(); salvarRegistro();">
+    <div id="campos-formulario"></div>
+
+    <p id="erro-registro" class="mensagem-erro" style="display:none;"></p>
+    <p id="sucesso-registro" class="mensagem-sucesso" style="display:none;">Registro salvo!</p>
+
+    <button type="submit" class="botao-primario">Salvar registro</button>
+    <a href="historico.html" style="display:block; text-align:center; margin-top:16px; font-size:0.9rem;">Ver histórico deste idoso</a>
+    <a href="index.html" style="display:block; text-align:center; margin-top:8px; font-size:0.85rem; color:var(--cor-texto-suave);">← Trocar de idoso</a>
+  </form>
+
+</div>
+
+<script>
+  const parametros = new URLSearchParams(window.location.search);
+  const idosoId = parametros.get("idoso");
+  let camposAtivos = [];
+
+  async function carregarFormulario() {
+    if (!idosoId) {
+      document.getElementById("carregando").textContent = "Nenhum idoso selecionado.";
+      return;
+    }
+
+    document.getElementById("data-hoje").textContent = new Date().toLocaleDateString("pt-BR", {
+      weekday: "long", day: "2-digit", month: "long"
+    });
+
+    // Busca o idoso e a avaliação inicial mais recente dele
+    const { data: idoso } = await supabase.from("idosos").select("nome").eq("id", idosoId).single();
+    if (idoso) document.getElementById("nome-idoso").textContent = idoso.nome;
+
+    const { data: avaliacao, error } = await supabase
+      .from("avaliacoes_iniciais")
+      .select("*")
+      .eq("idoso_id", idosoId)
+      .order("criado_em", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !avaliacao) {
+      document.getElementById("carregando").textContent =
+        "Este idoso ainda não tem avaliação inicial cadastrada.";
+      return;
+    }
+
+    // Aqui é onde a "adaptação" acontece: as regras de regras.js decidem
+    // quais campos entram, com base no que foi respondido no cadastro.
+    camposAtivos = montarCamposDoIdoso(avaliacao);
+    montarFormularioNaTela("campos-formulario", camposAtivos);
+
+    document.getElementById("carregando").style.display = "none";
+    document.getElementById("formulario-registro").style.display = "block";
+  }
+
+  async function salvarRegistro() {
+    const erro = document.getElementById("erro-registro");
+    const sucesso = document.getElementById("sucesso-registro");
+    erro.style.display = "none";
+    sucesso.style.display = "none";
+
+    const valores = coletarValoresFormulario(camposAtivos);
+    const { data: { session } } = await supabase.auth.getSession();
+
+    const { error: erroSalvar } = await supabase.from("registros_diarios").insert({
+      idoso_id: idosoId,
+      cuidador_id: session.user.id,
+      data: new Date().toISOString().slice(0, 10),
+      campos_extras: valores
+    });
+
+    if (erroSalvar) {
+      erro.textContent = "Erro ao salvar: " + erroSalvar.message;
+      erro.style.display = "block";
+      return;
+    }
+
+    sucesso.style.display = "block";
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  (async () => {
+    await checarSessao();
+    carregarFormulario();
+  })();
+</script>
+
+</body>
+</html>

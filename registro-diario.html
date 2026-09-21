@@ -30,7 +30,7 @@
     <p id="sucesso-registro" class="mensagem-sucesso" style="display:none;">Registro salvo!</p>
 
     <button type="submit" class="botao-primario">Salvar registro</button>
-    <a href="historico.html" style="display:block; text-align:center; margin-top:16px; font-size:0.9rem;">Ver histórico deste idoso</a>
+    <a href="#" id="link-historico" style="display:block; text-align:center; margin-top:16px; font-size:0.9rem;">Ver histórico deste idoso</a>
     <a href="index.html" style="display:block; text-align:center; margin-top:8px; font-size:0.85rem; color:var(--cor-texto-suave);">← Trocar de idoso</a>
   </form>
 
@@ -40,6 +40,8 @@
   const parametros = new URLSearchParams(window.location.search);
   const idosoId = parametros.get("idoso");
   let camposAtivos = [];
+
+  document.getElementById("link-historico").href = `historico.html?idoso=${idosoId}`;
 
   async function carregarFormulario() {
     if (!idosoId) {

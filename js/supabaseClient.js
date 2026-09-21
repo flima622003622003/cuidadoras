@@ -13,7 +13,15 @@ var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 // "var" em vez de "const": algumas extensões de navegador injetam este
 // script mais de uma vez na mesma página, e "const" quebraria tudo com
 // "Identifier already declared" na segunda execução.
-var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Guardamos o client em window.__supabaseSingleton para garantir que só
+// exista UMA instância mesmo se este arquivo rodar mais de uma vez —
+// duas instâncias do GoTrueClient no mesmo navegador perdem a sincronia
+// da sessão de login entre si, o que fazia o cadastro falhar por RLS
+// mesmo com o usuário logado.
+if (!window.__supabaseSingleton) {
+  window.__supabaseSingleton = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+var supabase = window.__supabaseSingleton;
 
 // Garante que só se acessa páginas internas estando logado.
 // Chame checarSessao() no topo de cada página que exige login.

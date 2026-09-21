@@ -182,15 +182,21 @@
       return;
     }
 
-    // 1. Cria o registro do idoso
-    const { data: idoso, error: erroIdoso } = await supabase
+    // 1. Cria o registro do idoso.
+    // O id é gerado aqui (não no banco) porque a política de leitura de
+    // "idosos" só libera idosos já vinculados ao cuidador (tabela
+    // cuidadores_idosos) — vínculo que só é criado no passo 2. Se
+    // deixássemos o Postgres gerar o id e pedíssemos o registro de volta
+    // (select().single()), o INSERT falharia por RLS antes mesmo de
+    // chegarmos ao passo 2.
+    const idosoId = crypto.randomUUID();
+    const { error: erroIdoso } = await supabase
       .from("idosos")
       .insert({
+        id: idosoId,
         nome,
         data_nascimento: document.getElementById("data_nascimento").value || null
-      })
-      .select()
-      .single();
+      });
 
     if (erroIdoso) {
       erro.textContent = "Erro ao salvar idoso: " + erroIdoso.message;
@@ -202,11 +208,11 @@
     const { data: { session } } = await supabase.auth.getSession();
     await supabase.from("cuidadores_idosos").insert({
       cuidador_id: session.user.id,
-      idoso_id: idoso.id
+      idoso_id: idosoId
     });
 
     // 3. Monta e salva a avaliação inicial
-    const avaliacao = { idoso_id: idoso.id };
+    const avaliacao = { idoso_id: idosoId };
     AVDS.forEach(([c]) => avaliacao[c] = valorRadio(c));
     AIVDS.forEach(([c]) => avaliacao[c] = valorRadio(c));
     CAMPOS_CLINICOS_SIM_NAO.forEach(([c]) => avaliacao[c] = valorRadio(c));
@@ -224,7 +230,7 @@
       return;
     }
 
-    window.location.href = `registro-diario.html?idoso=${idoso.id}`;
+    window.location.href = `registro-diario.html?idoso=${idosoId}`;
   }
 
   (async () => { await checarSessao(); })();

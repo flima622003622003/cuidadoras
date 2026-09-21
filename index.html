@@ -38,6 +38,7 @@
     <p class="subtitulo" style="margin-bottom: 16px;">Quem você vai registrar hoje?</p>
     <ul class="lista-idosos" id="lista-idosos"></ul>
     <a href="cadastro.html" class="botao-secundario" style="text-align:center; text-decoration:none; display:block;">+ Cadastrar novo idoso</a>
+    <a href="admin.html" id="link-admin" style="display:none; text-align:center; text-decoration:none; margin-top:16px; font-size:0.9rem;">Administração</a>
     <button class="link-sair" style="margin-top:24px;" onclick="fazerLogout()">Sair</button>
   </div>
 
@@ -82,6 +83,15 @@
         <a href="registro-diario.html?idoso=${v.idosos.id}">${v.idosos.nome}</a>
       </li>
     `).join("");
+
+    const { data: perfil } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+    if (perfil?.role === "admin") {
+      document.getElementById("link-admin").style.display = "block";
+    }
   }
 
   // Ao carregar a página, verifica se já existe sessão ativa

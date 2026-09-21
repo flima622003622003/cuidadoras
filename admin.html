@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuidar Perto — Administração</title>
+<link rel="stylesheet" href="css/estilo.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+</head>
+<body>
+<div class="pagina">
+
+  <div class="cabecalho">
+    <h1>Administração</h1>
+    <button class="link-sair" onclick="fazerLogout()">Sair</button>
+  </div>
+
+  <p class="ajuda" style="margin-bottom: 20px;">Apagar um registro diário é definitivo e não pode ser desfeito.</p>
+
+  <div id="lista-registros">Carregando...</div>
+
+</div>
+
+<script>
+  async function carregarRegistros() {
+    const container = document.getElementById("lista-registros");
+
+    const { data, error } = await supabase
+      .from("registros_diarios")
+      .select("id, data, criado_em, idosos(nome)")
+      .order("criado_em", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      // A política de leitura só libera para quem tem role "admin" em
+      // profiles. Se cair aqui, o usuário logado não é administrador.
+      container.innerHTML = "<p>Acesso restrito a administradores.</p>";
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      container.innerHTML = "<p>Nenhum registro cadastrado ainda.</p>";
+      return;
+    }
+
+    container.innerHTML = data.map(r => `
+      <div class="registro-item" id="registro-${r.id}">
+        <div class="data">${r.idosos?.nome || "(idoso removido)"} — ${new Date(r.data + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}</div>
+        <button class="botao-secundario" style="color:#A23B2E; margin-top:8px;" onclick="apagarRegistro('${r.id}')">Apagar registro</button>
+      </div>
+    `).join("");
+  }
+
+  async function apagarRegistro(id) {
+    if (!confirm("Apagar este registro definitivamente?")) return;
+
+    const { error } = await supabase.from("registros_diarios").delete().eq("id", id);
+    if (error) {
+      alert("Erro ao apagar: " + error.message);
+      return;
+    }
+    document.getElementById(`registro-${id}`).remove();
+  }
+
+  (async () => {
+    await checarSessao();
+    carregarRegistros();
+  })();
+</script>
+
+</body>
+</html>

@@ -275,3 +275,46 @@ input:focus, select:focus, textarea:focus, button:focus, .opcao input:focus + sp
   font-size: 0.85rem;
   color: var(--cor-texto-suave);
 }
+
+.nav-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-bottom: var(--espaco-2);
+  margin-bottom: var(--espaco-2);
+  border-bottom: 1px solid var(--cor-borda);
+  font-size: 0.85rem;
+}
+
+.nav-trilha a {
+  color: var(--cor-primaria-escura);
+  text-decoration: none;
+}
+
+.nav-trilha a:hover { text-decoration: underline; }
+
+.nav-trilha .nav-atual {
+  color: var(--cor-texto-suave);
+}
+
+.nav-trilha .nav-separador {
+  color: var(--cor-texto-suave);
+  margin: 0 2px;
+}
+
+.nav-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  white-space: nowrap;
+}
+
+.nav-admin {
+  color: var(--cor-primaria-escura);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.nav-admin:hover { text-decoration: underline; }

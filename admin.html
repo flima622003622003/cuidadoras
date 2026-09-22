@@ -7,13 +7,15 @@
 <link rel="stylesheet" href="css/estilo.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabaseClient.js"></script>
+<script src="js/navegacao.js"></script>
 </head>
 <body>
 <div class="pagina">
 
+  <div id="nav-topo" class="nav-topo"></div>
+
   <div class="cabecalho">
     <h1>Administração</h1>
-    <button class="link-sair" onclick="fazerLogout()">Sair</button>
   </div>
 
   <p class="ajuda" style="margin-bottom: 20px;">Apagar um registro diário é definitivo e não pode ser desfeito.</p>
@@ -65,6 +67,7 @@
 
   (async () => {
     await checarSessao();
+    montarNavegacao([{ label: "Administração" }]);
     carregarRegistros();
   })();
 </script>

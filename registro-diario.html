@@ -9,16 +9,18 @@
 <script src="js/supabaseClient.js"></script>
 <script src="js/regras.js"></script>
 <script src="js/formulario-dinamico.js"></script>
+<script src="js/navegacao.js"></script>
 </head>
 <body>
 <div class="pagina">
+
+  <div id="nav-topo" class="nav-topo"></div>
 
   <div class="cabecalho">
     <div>
       <h1 id="nome-idoso">Registro do dia</h1>
       <div class="subtitulo" id="data-hoje"></div>
     </div>
-    <button class="link-sair" onclick="fazerLogout()">Sair</button>
   </div>
 
   <p id="carregando">Carregando formulário...</p>
@@ -31,7 +33,6 @@
 
     <button type="submit" class="botao-primario">Salvar registro</button>
     <a href="#" id="link-historico" style="display:block; text-align:center; margin-top:16px; font-size:0.9rem;">Ver histórico deste idoso</a>
-    <a href="index.html" style="display:block; text-align:center; margin-top:8px; font-size:0.85rem; color:var(--cor-texto-suave);">← Trocar de idoso</a>
   </form>
 
 </div>
@@ -46,6 +47,7 @@
   async function carregarFormulario() {
     if (!idosoId) {
       document.getElementById("carregando").textContent = "Nenhum idoso selecionado.";
+      montarNavegacao([{ label: "Registro do dia" }]);
       return;
     }
 
@@ -56,6 +58,7 @@
     // Busca o idoso e a avaliação inicial mais recente dele
     const { data: idoso } = await supabase.from("idosos").select("nome").eq("id", idosoId).single();
     if (idoso) document.getElementById("nome-idoso").textContent = idoso.nome;
+    montarNavegacao([{ label: idoso?.nome || "Registro do dia" }]);
 
     const { data: avaliacao, error } = await supabase
       .from("avaliacoes_iniciais")

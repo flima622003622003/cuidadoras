@@ -7,18 +7,18 @@
 <link rel="stylesheet" href="css/estilo.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabaseClient.js"></script>
+<script src="js/navegacao.js"></script>
 </head>
 <body>
 <div class="pagina">
 
+  <div id="nav-topo" class="nav-topo"></div>
+
   <div class="cabecalho">
     <h1>Histórico</h1>
-    <button class="link-sair" onclick="fazerLogout()">Sair</button>
   </div>
 
   <div id="lista-registros">Carregando...</div>
-
-  <a href="javascript:history.back()" style="display:block; text-align:center; margin-top:20px; font-size:0.9rem;">← Voltar</a>
 
 </div>
 
@@ -60,6 +60,10 @@
 
   (async () => {
     await checarSessao();
+    montarNavegacao([
+      { label: "Registro do dia", href: `registro-diario.html?idoso=${idosoId}` },
+      { label: "Histórico" }
+    ]);
     carregarHistorico();
   })();
 </script>
